@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Салон красоты Summer · минимализм</title>
+    <!-- Yandex Maps API -->
+    <script src="https://api-maps.yandex.ru/2.1/?apikey=ваш_API_ключ&lang=ru_RU" type="text/javascript"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: #0a0a0c;
+            /* ===== СЮДА ВСТАВИТЬ СВОЙ ПАТТЕРН ===== */
+            background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgdmlld0JveD0iMCAwIDQwIDQwIj48cGF0aCBkPSJNMjAgMjBhMTAgMTAgMCAwIDEgMTAgMTAgMTAgMTAgMCAwIDEtMTAgMTAgMTAgMTAgMCAwIDEtMTAtMTAgMTAgMTAgMCAwIDEgMTAtMTB6IiBmaWxsPSIjZmZkZjkwIiBvcGFjaXR5PSIwLjAyIi8+PC9zdmc+');
+            /* background-size: 120px;  —— раскомментировать для настройки размера */
+            color: #eaeef2;
+            line-height: 1.5;
+            scroll-behavior: smooth;
+            font-weight: 300;
+        }
+
+        /* кастомный скролл (минимальный) */
+        ::-webkit-scrollbar {
+            width: 5px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #141414;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #3a3f44;
+            border-radius: 0;
+        }
+
+        /* ===== НАВИГАЦИЯ (максимально чистая) ===== */
+        .navbar {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(8, 8, 10, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            padding: 8px 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+
+        .logo-block {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-block img {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .logo-block h1 {
+            font-size: 1.4rem;
+            font-weight: 350;
+            color: #ffffff;
+            letter-spacing: 0.5px;
+        }
+        .logo-block h1 span {
+            font-weight: 500;
+            color: #fddea8;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 6px;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            font-size: 1rem;
+            font-weight: 400;
+            color: #cdd5db;
+            padding: 8px 18px;
+            transition: 0.2s;
+            border-radius: 28px;
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+        }
+
+        .nav-links a:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: #ffffff;
+            border-color: rgba(253, 222, 168, 0.3);
+        }
+
+        /* ===== СЕКЦИИ ===== */
+        .section {
+            padding: 70px 32px;
+            max-width: 1200px;
+            margin: 0 auto;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+        }
+
+        .section:last-of-type {
+            border-bottom: none;
+        }
+
+        h2 {
+            font-size: 2rem;
+            font-weight: 300;
+            color: #fddea8;
+            margin-bottom: 40px;
+            letter-spacing: -0.5px;
+        }
+
+        /* вкладка О нас (минимум линий) */
+        .about-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 40px;
+            align-items: center;
+        }
+        .about-img {
+            flex: 1 1 360px;
+            border-radius: 0;
+            overflow: hidden;
+            background: #1a1d20;
+        }
+        .about-img img {
+            width: 100%;
+            height: auto;
+            display: block;
+            opacity: 0.9;
+            transition: 0.3s;
+            filter: grayscale(0.2);
+        }
+        .about-img img:hover {
+            opacity: 1;
+            filter: grayscale(0);
+        }
+        .about-text {
+            flex: 1 1 300px;
+            padding: 20px 20px 20px 0;
+        }
+        .about-text h3 {
+            font-size: 2.8rem;
+            font-weight: 300;
+            color: #ffffff;
+            margin-bottom: 16px;
+            letter-spacing: -0.5px;
+        }
+        .about-text p {
+            font-size: 1.1rem;
+            color: #b0b8c0;
+            font-weight: 300;
+            line-height: 1.6;
+        }
+
+        /* блок ТГ (без лишних скруглений) */
+        .tg-block {
+            background: transparent;
+            padding: 20px 0 40px;
+        }
+
+        .slider-container {
+            position: relative;
+            max-width: 1000px;
+            margin: 30px auto;
+            overflow: hidden;
+            background: #101214;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .slider-images {
+            display: flex;
+            transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .slider-images img {
+            width: 100%;
+            flex-shrink: 0;
+            object-fit:contain;
+            height: 420px;
+            display: block;
+            filter: grayscale(0.3);
+        }
+
+        /* стрелки (простые, без круга) */
+        .prev, .next {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(10, 10, 12, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            font-size: 2rem;
+            width: 48px;
+            height: 48px;
+            cursor: pointer;
+            color: #d8d8d8;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            backdrop-filter: blur(6px);
+        }
+
+        .prev:hover, .next:hover {
+            background: rgba(30, 30, 32, 0.9);
+            color: #fddea8;
+            border-color: rgba(253, 222, 168, 0.5);
+        }
+
+        .prev { left: 16px; }
+        .next { right: 16px; }
+
+        .dots-container {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin: 20px 0 20px;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            background-color: #3d4247;
+            border-radius: 0;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .dot.active {
+            background-color: #fddea8;
+            width: 24px;
+        }
+
+        .slider-text {
+            font-size: 1.3rem;
+            font-weight: 300;
+            background: transparent;
+            padding: 16px 24px;
+            max-width: 700px;
+            margin: 0 auto 20px;
+            text-align: center;
+            color: #ced6de;
+            transition: opacity 0.4s;
+            border-bottom: 1px solid rgba(253, 222, 168, 0.2);
+            letter-spacing: 0.3px;
+        }
+
+        .btn-telegram {
+            display: inline-block;
+            background: transparent;
+            color: #fddea8;
+            font-size: 1.2rem;
+            font-weight: 400;
+            padding: 12px 38px;
+            text-decoration: none;
+            letter-spacing: 1px;
+            transition: 0.15s;
+            margin-top: 10px;
+            border: 1px solid rgba(253, 222, 168, 0.4);
+        }
+
+        .btn-telegram:hover {
+            background: rgba(253, 222, 168, 0.05);
+            border-color: #fddea8;
+        }
+
+        /* карта */
+        .map-container {
+            overflow: hidden;
+            height: 360px;
+            margin: 30px 0 20px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        #map {
+            width: 100%;
+            height: 100%;
+            /* Убраны фильтры, карта стандартная */
+        }
+
+        .map-footnote {
+            text-align: center;
+            font-size: 1rem;
+            color: #a0a8b0;
+            background: rgba(20, 20, 22, 0.7);
+            padding: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(4px);
+        }
+
+        /* футер (минимальный) */
+        .footer {
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(8px);
+            color: #9ca3aa;
+            padding: 32px 32px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 24px;
+            font-size: 0.95rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        .footer a {
+            color: #b9c2cb;
+            text-decoration: none;
+            border-bottom: 1px dotted transparent;
+            transition: 0.2s;
+        }
+
+        .footer a:hover {
+            color: #fddea8;
+            border-bottom-color: #fddea8;
+        }
+
+        .footer-icon {
+            width: 28px;
+            height: 28px;
+            opacity: 0.7;
+            filter: grayscale(1);
+            transition: 0.2s;
+        }
+
+        .footer-icon:hover {
+            opacity: 1;
+            filter: grayscale(0.3);
+        }
+
+        .copyright {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            color: #777d85;
+        }
+
+        .instruction-note {
+            background: rgba(20, 22, 24, 0.8);
+            padding: 12px 24px;
+            font-size: 0.9rem;
+            color: #b3b9c0;
+            margin: 40px 0 0;
+            border: 1px solid rgba(255, 215, 160, 0.1);
+            backdrop-filter: blur(4px);
+            text-align: center;
+        }
+        code {
+            color: #fddea8;
+            background: #1e2124;
+            padding: 2px 8px;
+            font-size: 0.85rem;
+        }
+
+        /* вспомогательный текст про паттерн */
+        .pattern-hint {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(8px);
+            padding: 8px 16px;
+            font-size: 0.8rem;
+            color: #aaa;
+            border: 1px solid #2f2f2f;
+            z-index: 999;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+
+<!-- НАВИГАЦИЯ -->
+<nav class="navbar">
+    <div class="logo-block">
+        <img src="logo.jpg"
+             alt="Summer logo">
+        <h1><span>Summer</span></h1>
+    </div>
+    <div class="nav-links">
+        <a href="#about">О нас</a>
+        <a href="#tg-bot">ТГ-бот</a>
+        <a href="#map">Карта</a>
+    </div>
+</nav>
+
+<!-- О НАС -->
+<section id="about" class="section">
+    <h2>О нас</h2>
+    <div class="about-container">
+        <div class="about-img">
+            <!-- заглушка фото внутри салона (минимум стилей) -->
+            <img src="salon_inside.jpg"
+                 alt="Интерьер салона Summer">
+        </div>
+        <div class="about-text">
+            <h3>🌸 О салоне красоты Summer</h3>
+            <p>Сеть премиальных салонов красоты в Москве. 5 удобных локаций, профессиональные мастера и уютная атмосфера.<br><br>
+            Наши услуги:<br>• Стрижки и укладки<br>• Маникюр и педикюр<br>• СПА-процедуры<br>• Визаж<br><br>✨ Запись через Telegram-бот @Summer_Beauty_bot — быстро и удобно!</p>
+        </div>
+    </div>
+</section>
+
+<!-- ТГ БОТ -->
+<section id="tg-bot" class="section tg-block">
+    <h2>Наш телеграм бот</h2>
+
+    <div class="slider-container">
+        <div class="slider-images" id="sliderImages"></div>
+        <button class="prev" id="prevBtn">❮</button>
+        <button class="next" id="nextBtn">❯</button>
+        <div class="dots-container" id="dotsContainer"></div>
+    </div>
+
+    <div class="slider-text" id="sliderCaption">минималистичный слайд</div>
+
+    <div style="text-align: center;">
+        <a href="https://t.me/Summer_Beauty_bot" class="btn-telegram" target="_blank">Перейти в ТГ-Бота →</a>
+    </div>
+</section>
+
+<!-- КАРТА -->
+<section id="map" class="section">
+    <h2>Карта</h2>
+    <div class="map-container" id="map"></div>
+    <p style="margin-top: 28px; text-align: center; font-size: 1rem; color: #9aa2aa; background: rgba(18,20,22,0.7); padding: 14px; border:1px solid #2a2e32; font-weight: 700;">
+        5 разных филиалов салонов <span style="font-weight: 900; color: #fddea8;">Summer</span> по г. Москва
+    </p>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+    <div class="copyright">
+        <span>©</span> 2026 Summer · все права защищены
+    </div>
+    <div>+7 999 123-45-67</div>
+    <a href="https://t.me/summer_salon" target="_blank">
+        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%239fa7b0'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.6.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.06-.2s-.18-.04-.26-.02c-.11.02-1.86 1.18-5.24 3.46-.5.34-.95.5-1.35.49-.45-.01-1.3-.25-1.94-.46-.78-.25-1.4-.38-1.35-.8.03-.22.33-.44.91-.68 3.6-1.57 5.99-2.6 7.19-3.1 3.42-1.42 4.13-1.67 4.6-1.68.1 0 .33.02.48.15.12.1.16.24.17.35-.02.09 0 .3 0 .3z'/%3E%3C/svg%3E"
+             alt="Telegram" class="footer-icon">
+    </a>
+</footer>
+
+<!-- СКРИПТЫ (без изменений, только слайдер и карта) -->
+<script>
+    (function() {
+        // данные слайдов (минимальные)
+
+        const sliderContainer = document.getElementById('sliderImages');
+        const dotsContainer = document.getElementById('dotsContainer');
+        const captionDiv = document.getElementById('sliderCaption');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+
+        let currentIndex = 0;
+        let slideInterval;
+       
+        const slidesData = [
+            { img: '1.jpg', caption: 'Приветственное сообщение.' },
+            { img: '2.jpg', caption: 'Вкладка "О нас".' },
+            { img: '3.jpg', caption: '5 разных адресов наших салонов по г.Москва на выбор.' },
+            { img: '4.jpg', caption: 'Выбор двух мастеров.' },
+            { img: '5.jpg', caption: 'Выбор удобной даты. Отображение дней со скидкой.' },
+            { img: '6.jpg', caption: 'Выбор удобного времени записи с пометкой о забронированном дне.' },
+        ];
+
+        function renderSlides() {
+            sliderContainer.innerHTML = '';
+            slidesData.forEach((slide) => {
+                const img = document.createElement('img');
+                img.src = slide.img;
+                sliderContainer.appendChild(img);
+            });
+
+            dotsContainer.innerHTML = '';
+            slidesData.forEach((_, i) => {
+                const dot = document.createElement('span');
+                dot.classList.add('dot');
+                dot.addEventListener('click', () => {
+                    goToSlide(i);
+                    resetTimer();
+                });
+                dotsContainer.appendChild(dot);
+            });
+
+            updateSlider();
+        }
+
+        function updateSlider() {
+            const width = sliderContainer.clientWidth;
+            sliderContainer.style.transform = `translateX(-${currentIndex * width}px)`;
+
+            captionDiv.style.opacity = 0;
+            setTimeout(() => {
+                captionDiv.innerText = slidesData[currentIndex].caption;
+                captionDiv.style.opacity = 1;
+            }, 240);
+
+            const dots = document.querySelectorAll('.dot');
+            dots.forEach((dot, i) => {
+                if (i === currentIndex) dot.classList.add('active');
+                else dot.classList.remove('active');
+            });
+        }
+
+        function nextSlide() {
+            currentIndex = (currentIndex + 1) % slidesData.length;
+            updateSlider();
+        }
+
+        function prevSlide() {
+            currentIndex = (currentIndex - 1 + slidesData.length) % slidesData.length;
+            updateSlider();
+        }
+
+        function goToSlide(index) {
+            currentIndex = index;
+            updateSlider();
+        }
+
+        function resetTimer() {
+            clearInterval(slideInterval);
+            slideInterval = setInterval(nextSlide, 3000);
+        }
+
+        renderSlides();
+        prevBtn.addEventListener('click', () => { prevSlide(); resetTimer(); });
+        nextBtn.addEventListener('click', () => { nextSlide(); resetTimer(); });
+        resetTimer();
+        window.addEventListener('resize', updateSlider);
+    })();
+
+        ymaps.ready(initMap);
+        function initMap() {
+            var myMap = new ymaps.Map('map', {
+                center: [55.7558, 37.6176], // Координаты центра Москвы
+                zoom: 11
+            });
+
+            // Массив с координатами пяти филиалов
+            var coordinates = [
+                [55.7558, 37.6176],
+                [55.7658, 37.6876],
+                [55.7458, 37.5776],
+                [55.7758, 37.6376],
+                [55.7358, 37.6576]
+            ];
+
+            coordinates.forEach(function(coord) {
+                var placemark = new ymaps.Placemark(coord, {
+                    hintContent: 'Summer',
+                    balloonContent: 'Салон красоты Summer'
+                }, {
+                    preset: 'islands#lightBlueDotIcon',
+                    iconColor: 'red'
+                });
+                myMap.geoObjects.add(placemark);
+            });
+        }
+</script>
+</body>
+</html>
